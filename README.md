@@ -66,22 +66,20 @@ Controller ESP32
    4 Motors
 ```
 
-## 2 Parts Used
+## 2 Bill of Materials
 
-These are the parts I used
+| Part | Qty. | Purpose | Link |
+|---|---:|---|---|
+| ESP32 development board | 2 | Hand controller and car receiver | [Product page](https://robu.in/product/esp-wroom-32-wifi-bluetooth-networking-smart-component-development-board/) |
+| MPU-9250 IMU | 1 | Reads hand tilt | [Product page](https://robu.in/product/mpu-9250-9-axis-attitude-gyro-accelerometer-magnetometer-sensor-module/) |
+| L298N motor driver | 1 | Drives the left and right motor pairs | [Product page](https://robu.in/product/l298n-2a-based-motor-driver-module/) |
+| BO geared DC motor | 4 | Drives the wheels | [Product page](https://robu.in/product/dual-shaft-bo-motor-straight/) |
+| 65 mm robot wheel | 4 | Fits the BO motor shafts | [Product page](https://robu.in/product/smart-car-robot-plastic-tire-wheel/) |
+| HC-SR04 ultrasonic sensor | 1 | Detects obstacles in front of the car | [Product page](https://robu.in/product/ultrasonic-transceiver-module-hc-sr04/) |
+| 7.4 V, 2-cell battery pack | 1 | Powers the car | [Product page](https://robu.in/product/orange-2s-7-4v-2200mah-25c-lithium-polymer-battery-pack-lipo/) |
+| 3D-printed chassis parts | As needed | Holds the motors and electronics | [CAD files](3D%20Cad/The%20Nonchalant.step) |
 
-| Part | Quantity |
-|---|---|
-| ESP32 | 2 |
-| MPU9250 | 1 |
-| L298N Motor Driver | 1 |
-| BO Motors | 4 |
-| Wheels | 4 |
-| HC SR04 | 1 |
-| 7.4V Battery | 1 |
-| 3D Printed Parts | As needed |
-
-I used 3D printed parts to make the body of the car and to hold everything in place
+The links are examples for the parts used in this build; equivalent parts should work if their specifications match.
 
 ## 3 Wiring
 
