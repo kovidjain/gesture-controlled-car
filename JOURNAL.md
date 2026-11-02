@@ -1,55 +1,182 @@
-# Build journal: The Nonchalant
 
-These are my notes from designing and assembling the gesture-controlled car. I kept the wiring, firmware, and chassis work in one project so I could check the mechanical and electronics decisions together.
+# Build Journal
 
-## Planning the controls
+## The Nonchalant
 
-I wanted to try a hand-tilt controller instead of a joystick. I chose two ESP32 boards so one could read the sensor and the other could stay on the car. ESP-NOW lets them exchange the small movement commands directly. I also planned an ultrasonic sensor for the front of the chassis, with the L298N driving the four geared motors in left and right pairs.
+This is where I have added the work I did while making The Nonchalant
 
-The first wiring plan used GPIO 15 and 14 for I2C on the controller. On the car, the L298N direction pins use GPIOs 26, 25, 17, and 16; the enable pins use 32 and 33. The HC-SR04 uses GPIO 18 for trigger and 19 for echo. I added a resistor divider to the echo line because the ESP32 input is 3.3 V tolerant and the sensor echo can be 5 V.
+I made this car using ESP32 and wanted to control it just by moving my hand
 
-![Circuit plan](assets/circuit-diagram.png)
+I worked on the car design wiring and code and kept everything in the same project
 
-## Designing the chassis
+## 1 Starting the Project
 
-I made the chassis in Fusion 360 and called the project “The Nonchalant.” I wanted a custom layout for the motors, battery, driver, and sensor instead of starting from a flat plate. I worked on the base first, then the motor mounts and the front sensor opening. The assembly view helped me check where the wheels and electronics would sit before printing.
+I wanted to make a car that works using hand movements instead of a normal remote
 
-![Chassis sketch](assets/cad-sketch-base.png)
+For this I used two ESP32 boards
 
-![Motor mount detail](assets/cad-side-bracket.png)
+One ESP32 reads the hand movements using an MPU9250 sensor and the other ESP32 controls the car
 
-![Front sensor mount](assets/cad-bumper-mount.png)
+I used ESP NOW to send commands between them
 
-I added reinforcement around the chassis and motor-mount areas, then exported the model as Fusion 360 and STEP files. The project folder contains the assembly files and CAD images used during the design.
+For the motors I used an L298N motor driver and four BO motors
 
-![Full CAD assembly](assets/cad-full-assembly.png)
+I also added an HC SR04 sensor at the front to detect obstacles
 
-![Reinforced chassis detail](assets/cad-reinforcement.png)
+### Circuit Diagram
 
-## Assembly
+![Circuit Diagram](assets/circuit-diagram.png)
 
-After printing the parts, I mounted the four BO motors and fitted the wheels. The receiver ESP32 and L298N sit in the chassis, and the HC-SR04 fits at the front. I routed the wires inside the body and checked that the wheels could turn without rubbing against it.
+## 2 Wiring
 
-![Electronics inside the chassis](assets/PHOTO-2026-10-23-02-08-37.jpg)
+I connected the MPU9250 to the controller ESP32 using GPIO 15 and GPIO 14
 
-## Controller firmware
+For the car I connected the L298N motor driver to GPIO 26 25 17 and 16
 
-The controller sketch reads the MPU-9250 accelerometer over I2C and calculates pitch and roll. A tilt past 15 degrees selects a movement command; when the hand is closer to level, it sends a brake command. The sketch sends a packet about every 100 ms over ESP-NOW.
+GPIO 32 and 33 are used to control the motor speed
 
-I used GPIO 15 for SDA and GPIO 14 for SCL. The receiver's MAC address has to be entered in the `carMAC` array before the boards can talk to each other. The value in the repository is an example placeholder.
+The ultrasonic sensor uses GPIO 18 and 19
 
-![ESP-NOW setup](assets/code-espnow-setup.png)
+I also used a resistor divider for the Echo pin because the sensor gives 5V and the ESP32 works with 3.3V signals
 
-![Gesture angle calculation](assets/code-gesture-math.png)
+## 3 Designing the Car
 
-## Receiver and driving behavior
+I used Fusion 360 to make the chassis
 
-The receiver sketch maps each command to the motor pins. It uses PWM on GPIOs 32 and 33, with the speed set to 180 on an 8-bit scale. Left and right turns stop one motor pair while driving the other. A backward tilt toggles the reverse direction state.
+I wanted to design the body myself instead of using a ready made car chassis
 
-The distance check uses a 20 cm threshold. When an object is close, the receiver brakes, waits briefly, turns right for a short interval, and brakes again. The sketch also checks for an obstacle before driving forward.
+I started with the base and then made space for the motors battery and other parts
 
-![Car turning during a test](assets/car-turning-test.jpg)
+I also designed the motor mounts and a place for the ultrasonic sensor at the front
 
-The folder includes a short driving video and additional assembly photos. Before repeating the build, I would check the motor directions with the wheels raised and confirm the receiver MAC address in the controller sketch.
+### Base Design
 
-[Driving video](assets/VIDEO-2026-10-23-02-05-10.mp4)
+![Chassis Sketch](assets/cad-sketch-base.png)
+
+### Motor Mount
+
+![Motor Mount](assets/cad-side-bracket.png)
+
+### Front Sensor Mount
+
+![Sensor Mount](assets/cad-bumper-mount.png)
+
+After making the basic design I added some support around the chassis and motor mounts to make them stronger
+
+I checked the full model in Fusion 360 to see how everything would fit
+
+### Full Car Design
+
+![Full CAD Assembly](assets/cad-full-assembly.png)
+
+### Chassis Support
+
+![Reinforced Chassis](assets/cad-reinforcement.png)
+
+I saved the design in Fusion 360 and STEP formats so I could use it again or make changes later
+
+## 4 Building the Car
+
+After finishing the design I printed the chassis parts
+
+Then I attached the four BO motors and wheels
+
+I placed the ESP32 and L298N motor driver inside the car
+
+The ultrasonic sensor was placed at the front
+
+I connected the wires and checked that the wheels had enough space to move
+
+### Electronics Inside the Car
+
+![Car Electronics](assets/PHOTO-2026-10-23-02-08-37.jpg)
+
+## 5 Hand Controller Code
+
+For the hand controller I used the MPU9250 sensor
+
+The sensor reads how much I tilt my hand
+
+The ESP32 uses these readings to decide which command to send
+
+I kept the tilt limit at 15 degrees
+
+If I tilt my hand more than that the controller sends a movement command
+
+If my hand is straight it sends a stop command
+
+The commands are sent every 100 milliseconds using ESP NOW
+
+I used GPIO 15 for SDA and GPIO 14 for SCL
+
+I also had to add the MAC address of the car ESP32 in the controller code
+
+The MAC address already written in the code is just an example and needs to be changed
+
+### ESP NOW Code
+
+![ESP NOW Setup](assets/code-espnow-setup.png)
+
+### Gesture Calculation
+
+![Gesture Calculation](assets/code-gesture-math.png)
+
+## 6 Car Receiver Code
+
+The ESP32 on the car receives the commands from the hand controller
+
+It then controls the motors using the L298N motor driver
+
+I used GPIO 32 and 33 for motor speed control
+
+The speed value is set to 180 out of 255
+
+For turning the car runs the motors on one side and stops the other side
+
+When I tilt my hand backward the car switches to reverse mode
+
+Tilting backward again switches it back
+
+## 7 Obstacle Detection
+
+I used the HC SR04 sensor to detect objects in front of the car
+
+I set the distance limit to 20 cm
+
+If something comes too close the car stops for a moment then turns right and stops again
+
+The code also checks the distance before moving forward
+
+This helps the car avoid hitting objects in front of it
+
+## 8 Testing
+
+After connecting everything I tested the car using the hand controller
+
+I checked the forward backward left and right movements
+
+I also checked how the car turns and how the ultrasonic sensor responds when something is in front of it
+
+### Turning Test
+
+![Car Turning](assets/car-turning-test.jpg)
+
+I kept the wheels off the ground while checking the motor directions
+
+I also checked the MAC address to make sure both ESP32 boards could communicate
+
+## 9 Demo
+
+I added a short video showing the car moving using hand gestures
+
+[Watch the Driving Video](assets/VIDEO-2026-10-23-02-05-10.mp4)
+
+## 10 Final Notes
+
+This project helped me learn more about ESP32 wireless communication sensors motor control and 3D design
+
+I got to work on both the hardware and coding parts
+
+The main thing I wanted was to make a car that could move based on my hand movements
+
+I still have a few things I can improve later but I enjoyed making this project
