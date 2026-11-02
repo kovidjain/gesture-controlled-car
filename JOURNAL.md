@@ -3,180 +3,198 @@
 
 ## The Nonchalant
 
-This is where I have added the work I did while making The Nonchalant
+This is my build journal for The Nonchalant
 
-I made this car using ESP32 and wanted to control it just by moving my hand
+I wanted to make a small car that I could control using my hand instead of a normal remote
 
-I worked on the car design wiring and code and kept everything in the same project
+I used two ESP32 boards for this project One is for the hand controller and the other is for the car
+
+I worked on the design wiring and code and kept the photos and other files here so I could see how the project came together
+
+![The Nonchalant](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
 ## 1 Starting the Project
 
-I wanted to make a car that works using hand movements instead of a normal remote
+I wanted to try making something that moves based on hand gestures
 
-For this I used two ESP32 boards
+The idea was to use a sensor to read how I tilt my hand and send that movement to the car
 
-One ESP32 reads the hand movements using an MPU9250 sensor and the other ESP32 controls the car
+I chose an MPU9250 sensor and two ESP32 boards
 
-I used ESP NOW to send commands between them
+I used ESP NOW because it lets the two boards communicate wirelessly
 
-For the motors I used an L298N motor driver and four BO motors
+For the car I used four BO motors and an L298N motor driver
 
-I also added an HC SR04 sensor at the front to detect obstacles
+I also added an ultrasonic sensor to detect things in front of the car
 
-### Circuit Diagram
-
-![Circuit Diagram](assets/circuit-diagram.png)
+![Circuit Plan](assets/circuit-diagram.png)
 
 ## 2 Wiring
 
-I connected the MPU9250 to the controller ESP32 using GPIO 15 and GPIO 14
+I started by connecting the MPU9250 sensor to the controller ESP32
+
+I used GPIO 15 for SDA and GPIO 14 for SCL
 
 For the car I connected the L298N motor driver to GPIO 26 25 17 and 16
 
 GPIO 32 and 33 are used to control the motor speed
 
-The ultrasonic sensor uses GPIO 18 and 19
+I connected the ultrasonic sensor using GPIO 18 for Trigger and GPIO 19 for Echo
 
-I also used a resistor divider for the Echo pin because the sensor gives 5V and the ESP32 works with 3.3V signals
+I also used a resistor divider for the Echo pin because the sensor sends a 5V signal and the ESP32 needs 3.3V
+
+I connected the grounds together and made sure the motors were powered through the driver
+
+![Wiring Diagram](assets/circuit-diagram.png)
 
 ## 3 Designing the Car
 
-I used Fusion 360 to make the chassis
+I used Fusion 360 to make the car body
 
-I wanted to design the body myself instead of using a ready made car chassis
+I wanted to design the chassis myself so I could place the motors and electronics where I wanted
 
-I started with the base and then made space for the motors battery and other parts
+I started by making the base and then worked on the motor mounts
 
-I also designed the motor mounts and a place for the ultrasonic sensor at the front
+After that I made space for the battery ESP32 and motor driver
 
-### Base Design
+I also made a place for the ultrasonic sensor at the front
 
-![Chassis Sketch](assets/cad-sketch-base.png)
+I checked the full model to see how the parts would fit together before printing
 
-### Motor Mount
+![Chassis Design](assets/cad-sketch-base.png)
 
 ![Motor Mount](assets/cad-side-bracket.png)
 
-### Front Sensor Mount
+![Front Sensor Mount](assets/cad-bumper-mount.png)
 
-![Sensor Mount](assets/cad-bumper-mount.png)
+I added some extra support around the chassis and motor mounts
 
-After making the basic design I added some support around the chassis and motor mounts to make them stronger
+Then I saved the design in Fusion 360 and STEP formats
 
-I checked the full model in Fusion 360 to see how everything would fit
+![Full CAD Model](assets/cad-full-assembly.png)
 
-### Full Car Design
-
-![Full CAD Assembly](assets/cad-full-assembly.png)
-
-### Chassis Support
-
-![Reinforced Chassis](assets/cad-reinforcement.png)
-
-I saved the design in Fusion 360 and STEP formats so I could use it again or make changes later
+![Chassis Support](assets/cad-reinforcement.png)
 
 ## 4 Building the Car
 
 After finishing the design I printed the chassis parts
 
-Then I attached the four BO motors and wheels
+I attached the four BO motors and fitted the wheels
 
-I placed the ESP32 and L298N motor driver inside the car
+Then I placed the ESP32 and L298N motor driver inside the chassis
 
-The ultrasonic sensor was placed at the front
+I mounted the ultrasonic sensor at the front
 
-I connected the wires and checked that the wheels had enough space to move
+After that I connected the wires and checked if the wheels could rotate without touching the body
 
-### Electronics Inside the Car
+I tried to keep the electronics inside the chassis so everything would fit properly
 
 ![Car Electronics](assets/PHOTO-2026-10-23-02-08-37.jpg)
 
 ## 5 Hand Controller Code
 
-For the hand controller I used the MPU9250 sensor
+I wrote the hand controller code in Arduino IDE
 
-The sensor reads how much I tilt my hand
+The MPU9250 sensor reads the tilt of my hand
 
-The ESP32 uses these readings to decide which command to send
+The ESP32 uses these readings to decide which command to send to the car
 
-I kept the tilt limit at 15 degrees
+I kept the tilt limit at 15 degrees so small hand movements would not make the car move
 
-If I tilt my hand more than that the controller sends a movement command
+When my hand is level the controller sends a stop command
 
-If my hand is straight it sends a stop command
+The controller sends commands every 100 milliseconds using ESP NOW
 
-The commands are sent every 100 milliseconds using ESP NOW
+I also added the MAC address of the car ESP32 in the controller code
 
-I used GPIO 15 for SDA and GPIO 14 for SCL
-
-I also had to add the MAC address of the car ESP32 in the controller code
-
-The MAC address already written in the code is just an example and needs to be changed
-
-### ESP NOW Code
+The MAC address in the project code is only an example and needs to be replaced
 
 ![ESP NOW Setup](assets/code-espnow-setup.png)
-
-### Gesture Calculation
 
 ![Gesture Calculation](assets/code-gesture-math.png)
 
 ## 6 Car Receiver Code
 
-The ESP32 on the car receives the commands from the hand controller
+Next I worked on the code for the ESP32 inside the car
 
-It then controls the motors using the L298N motor driver
+This ESP32 receives commands from the hand controller and controls the motors using the L298N driver
 
-I used GPIO 32 and 33 for motor speed control
+I used GPIO 32 and 33 to control the motor speed
 
-The speed value is set to 180 out of 255
+The speed is set to 180 out of 255
 
-For turning the car runs the motors on one side and stops the other side
+For turning the car runs the motors on one side while stopping the motors on the other side
+
+I also added a reverse mode
 
 When I tilt my hand backward the car switches to reverse mode
 
-Tilting backward again switches it back
+Tilting backward again changes it back to forward mode
+
+![Car Turning Test](assets/car-turning-test.jpg)
 
 ## 7 Obstacle Detection
 
-I used the HC SR04 sensor to detect objects in front of the car
+I added an HC SR04 ultrasonic sensor at the front of the car
+
+I wanted the car to detect objects in front of it while moving
 
 I set the distance limit to 20 cm
 
-If something comes too close the car stops for a moment then turns right and stops again
+When something comes closer than 20 cm the car stops and turns right for a short time
+
+After turning it stops again
 
 The code also checks the distance before moving forward
 
-This helps the car avoid hitting objects in front of it
+This helps the car avoid objects in front of it
 
-## 8 Testing
+![Front Sensor Design](assets/cad-bumper-mount.png)
 
-After connecting everything I tested the car using the hand controller
+## 8 Testing the Car
 
-I checked the forward backward left and right movements
+After connecting everything I started testing the car
 
-I also checked how the car turns and how the ultrasonic sensor responds when something is in front of it
+I checked the motor directions with the wheels raised before putting the car on the floor
 
-### Turning Test
+Then I tried moving my hand forward left and right to check if the car responded correctly
 
-![Car Turning](assets/car-turning-test.jpg)
+I also checked the reverse mode by tilting my hand backward
 
-I kept the wheels off the ground while checking the motor directions
+After that I tested the ultrasonic sensor by placing an object in front of the car
 
-I also checked the MAC address to make sure both ESP32 boards could communicate
+I checked how the car stopped and turned when the object was close
+
+![Car Testing](assets/car-turning-test.jpg)
 
 ## 9 Demo
 
-I added a short video showing the car moving using hand gestures
+I recorded a short video to show the car working
+
+In the video I used the hand controller to move the car in different directions
+
+The ESP32 on the controller sends commands wirelessly to the ESP32 on the car
+
+The car then moves based on how I tilt my hand
+
+This video shows the car after putting together the code electronics and 3D printed parts
+
+![The Nonchalant](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
 [Watch the Driving Video](assets/VIDEO-2026-10-23-02-05-10.mp4)
 
 ## 10 Final Notes
 
-This project helped me learn more about ESP32 wireless communication sensors motor control and 3D design
+This project was my attempt to make a car that works using hand gestures instead of a normal remote
 
-I got to work on both the hardware and coding parts
+I got to work with ESP32 boards ESP NOW sensors motor drivers and Fusion 360
 
-The main thing I wanted was to make a car that could move based on my hand movements
+I learned how to send commands wirelessly and use those commands to control the motors
 
-I still have a few things I can improve later but I enjoyed making this project
+I also got more experience with wiring designing parts and putting together a working car
+
+There are still a few things I would like to improve later
+
+Overall I enjoyed making The Nonchalant and seeing the car move using my hand movements
+
+![Final Car](assets/PHOTO-2026-10-23-01-56-13.jpg)
