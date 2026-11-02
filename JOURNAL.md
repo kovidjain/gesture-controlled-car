@@ -1,154 +1,184 @@
 
 # The Nonchalant — Build Journal
 
-## Stage 1 — Starting with the idea
+## Stage 1 — The idea
 
 **Time spent: 2h 30m**
 
-I wanted to make a car that could move based on how I tilted my hand. I didn't want to use a normal remote because I wanted to try something different.
+I wanted to try making a car that I could move without holding a normal remote
 
-I decided to use an MPU9250 sensor to read my hand movements and two ESP32 boards to communicate using ESP-NOW.
+The idea was to use my hand to control it. Like tilting my hand forward to move and sideways to turn
 
-I planned to use four BO motors with an L298N motor driver. I also wanted to add an ultrasonic sensor so the car could avoid obstacles.
+I had an MPU9250 in mind for reading the tilt and decided to use two ESP32 boards. One would be in my hand and the other would stay on the car
 
-I decided to design the chassis myself in Fusion 360.
+I chose ESP NOW because I didn't want to make an app or connect everything to WiFi
+
+I also decided to make the car body myself in Fusion 360
+
+At this point I had a rough idea of what I wanted and which parts I would need
 
 ![Finished Car](assets/PHOTO-2026-10-23-01-56-13.jpg)
 
-## Stage 2 — Parts and wiring
+## Stage 2 — Getting the wiring sorted
 
 **Time spent: 2h**
 
-I started working on the circuit connections. I connected the MPU9250 to the controller ESP32 using GPIO 15 and 14.
+There were quite a few connections to work out for this car
 
-On the car I connected the L298N motor driver to GPIO 26, 25, 17 and 16. I used GPIO 32 and 33 for motor speed control.
+The controller side only needed the MPU9250 connected to the ESP32. I used GPIO 15 for SDA and GPIO 14 for SCL
 
-I also connected the ultrasonic sensor using GPIO 18 and 19. Since the Echo pin can output 5V, I used a resistor divider to protect the ESP32.
+The car side had more wires because of the four motors and the L298N driver
 
-I made a circuit diagram so I could keep track of the connections.
+I connected the motor control pins to GPIO 26 25 17 and 16. The speed control pins went to GPIO 32 and 33
+
+The ultrasonic sensor used GPIO 18 and 19
+
+I also used a resistor divider on the Echo wire because I couldn't connect the 5V signal directly to the ESP32
+
+I kept the circuit diagram nearby so I could check the connections
 
 ![Circuit Diagram](assets/circuit-diagram.png)
 
-## Stage 3 — Designing the chassis base
+## Stage 3 — Starting the chassis in Fusion 360
 
 **Time spent: 4h 30m**
 
-I opened Fusion 360 and started designing the base of the car.
+I started the 3D model with the bottom plate of the car
 
-I had to make enough space for the battery, motors and electronics. I also needed to think about where the wheels would sit.
+I needed a place for four motors and a battery and I also had to leave space for the ESP32 and motor driver
 
-I made the basic shape first and then worked on the motor mounting positions.
+I didn't want the body to be much bigger than it needed to be
 
-I checked the dimensions because I wanted everything to fit properly after printing.
+I worked on the base shape and the motor positions first
+
+I spent time checking the dimensions and thinking about where the wires would pass through
+
+This was the first proper part of the car that I made in Fusion 360
 
 ![Chassis Base](assets/cad-sketch-base.png)
 
-## Stage 4 — Finishing the 3D design
+## Stage 4 — The rest of the 3D model
 
 **Time spent: 3h 30m**
 
-I continued working on the chassis in Fusion 360.
+After the base I worked on the parts that would hold everything in place
 
-I made the remaining mounting parts and added a place for the ultrasonic sensor at the front.
+I made the motor mounts and the front section for the ultrasonic sensor
 
-I also added some reinforcement around the chassis so it would be stronger.
+I also added some reinforcement to the chassis
 
-After checking the complete model, I saved the Fusion 360 design and exported a STEP file.
+I looked at the complete assembly in Fusion 360 to check where everything would sit
 
-![Full CAD Assembly](assets/cad-full-assembly.png)
+Once the model was ready I saved the Fusion 360 file and exported a STEP version too
 
-## Stage 5 — Printing and assembling the car
+![Full CAD Model](assets/cad-full-assembly.png)
+
+## Stage 5 — Building the actual car
 
 **Time spent: 3h 30m**
 
-After finishing the design I started putting the car together.
+This was the part where I could finally put the pieces together
 
-I fitted the four BO motors into the printed chassis and attached the wheels.
+I fitted the BO motors into the printed chassis and attached all four wheels
 
-Then I placed the ESP32, L298N motor driver and battery inside the car.
+Then I placed the ESP32 and the L298N motor driver on the car
 
-I also mounted the ultrasonic sensor at the front and connected the wires.
+I had to keep the battery and wiring in mind because there wasn't unlimited space inside
 
-I checked the wheel movement and made sure the parts were fitted properly.
+I mounted the ultrasonic sensor at the front
+
+After connecting everything I checked that the wheels had enough room to rotate
 
 ![Car Assembly](assets/PHOTO-2026-10-23-02-08-37.jpg)
 
-## Stage 6 — Making the hand controller
+## Stage 6 — Writing the hand controller code
 
 **Time spent: 3h 30m**
 
-I started writing the code for the hand controller in Arduino IDE.
+I started working on the part that reads my hand movements
 
-The MPU9250 reads the tilt of my hand. I used the readings to decide whether the car should move forward, left, right or stop.
+The MPU9250 gives the readings and I use them to work out which way my hand is tilted
 
-I kept the tilt threshold at 15 degrees because I didn't want small hand movements to trigger commands.
+I kept the limit at 15 degrees because I didn't want tiny movements to keep changing the direction
 
-I used ESP-NOW to send commands to the car every 100 milliseconds.
+When I tilt my hand forward it sends a forward command. Tilting left or right sends the turning commands
 
-I also added a reverse toggle using a backward hand movement.
+When my hand is level it sends the brake command
 
-![Gesture Controller Code](assets/code-gesture-math.png)
+I also used a backward tilt to change reverse mode
 
-## Stage 7 — Getting the motors to move
+The controller sends the commands using ESP NOW about every 100 milliseconds
+
+![Hand Controller Code](assets/code-gesture-math.png)
+
+## Stage 7 — Making the car respond
 
 **Time spent: 3h**
 
-I worked on the receiver ESP32 code.
+Now I had to make the ESP32 on the car do something with the commands it received
 
-The car receives commands from the hand controller and uses the L298N motor driver to control the wheels.
+I wrote the receiver code and connected it to the motor driver controls
 
-I set the PWM speed to 180 out of 255.
+I kept the PWM value at 180 out of 255
 
-For turning I made one side of the motors run while the other side stopped. This allowed the car to turn without needing a steering mechanism.
+For turning I made one side of the wheels run while the other side stopped
 
-I also worked on making sure the reverse command changed the driving direction.
+I didn't need a separate steering motor because the car turns using the wheels on each side
 
-![ESP NOW Code](assets/code-espnow-setup.png)
+I also added the reverse mode so I could change the driving direction from the hand controller
 
-## Stage 8 — Adding obstacle detection
+![ESP NOW Setup](assets/code-espnow-setup.png)
+
+## Stage 8 — Working on the obstacle sensor
 
 **Time spent: 1h 30m**
 
-I worked on the HC-SR04 ultrasonic sensor.
+I wanted the car to react if something was directly in front of it
 
-I set the obstacle distance to 20 cm.
+I used the HC SR04 sensor for checking the distance
 
-When the sensor detects something too close in front of the car, the code stops the motors and makes the car turn right for a short time.
+I set the distance limit to 20 cm
 
-After turning it stops again.
+If an object is too close the car brakes and turns right for a short time
 
-I also added a distance check before the car moves forward.
+It stops again after turning
 
-![Ultrasonic Sensor Mount](assets/cad-bumper-mount.png)
+I also made the receiver check the distance before moving forward
 
-## Stage 9 — Testing everything
+![Front Sensor Mount](assets/cad-bumper-mount.png)
+
+## Stage 9 — Testing the movements
 
 **Time spent: 2h**
 
-I started testing the car after uploading the code to both ESP32 boards.
+Once the code was uploaded to both ESP32 boards I started testing everything together
 
-First I checked the motor directions with the wheels raised.
+I checked the motors with the wheels raised first
 
-Then I tested the hand gestures to see if the car moved in the correct direction.
+Then I put the car down and tried the hand controller
 
-I also checked the reverse toggle and the obstacle detection.
+I checked whether it moved forward and turned the right way when I tilted my hand
 
-I tested the car on the floor to see how it behaved while turning and moving forward.
+I tried the reverse toggle as well
+
+I also placed something in front of the ultrasonic sensor to check the obstacle response
 
 ![Car Turning Test](assets/car-turning-test.jpg)
 
-## Stage 10 — Final demo
+## Stage 10 — Final video
 
 **Time spent: 1h**
 
-After putting everything together I recorded a short video of the car moving.
+After the car was working I recorded a short video of it moving
 
-I used the hand controller to move the car forward and turn it.
+I used the hand controller to show the forward movement and turning
 
-I also checked that the wireless communication was working during the demo.
+The controller and car communicate directly using ESP NOW so I didn't need to connect them to a router
 
-I kept the code, CAD files and project photos together so I could upload them with the project.
+I kept the CAD model Arduino code and project pictures together for uploading
+
+I still have a few things I could improve but I was able to make the hand controlled car I originally wanted
 
 ![Chassis Reinforcement](assets/cad-reinforcement.png)
 
-[Watch the Demo Video](assets/VIDEO-2026-10-23-02-05-10.mp4)
+[Watch the Driving Video](assets/VIDEO-2026-10-23-02-05-10.mp4)
